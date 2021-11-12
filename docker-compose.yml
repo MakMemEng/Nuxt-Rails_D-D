@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  db:
+    platform: linux/x86_64
+    image: mysql:8.0
+    env_file:
+      - ./.env
+    environment:
+      TZ: UTC
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: app_development
+    volumes:
+      - "./api/tmp/db:/var/lib/mysql"
+
+  api:
+    build:
+      context: ./api
+      args:
+        WORKDIR: ${WORKDIR}
+    env_file:
+      - ./.env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - "./api:/${WORKDIR}"
+    depends_on:
+      - db
+    ports:
+      - "${API_PORT}:3000"
+    tty: true
+    stdin_open: true
+
+  front:
+    build:
+      context: ./front
+      args:
+        WORKDIR: ${WORKDIR}
+    command: yarn run dev
+    volumes:
+      - "./front:/${WORKDIR}"
+    ports:
+      - "${FRONT_PORT}:3000"
+    depends_on:
+      - api
