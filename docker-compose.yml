@@ -5,11 +5,10 @@ services:
     platform: linux/x86_64
     image: mysql:8.0
     env_file:
-      - ./.env
+      - .env
     environment:
       TZ: UTC
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: app_development
     volumes:
       - "./api/tmp/db:/var/lib/mysql"
 
@@ -19,9 +18,10 @@ services:
       args:
         WORKDIR: ${WORKDIR}
     env_file:
-      - ./.env
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      API_DOMAIN: "localhost:$FRONT_PORT"
     volumes:
       - "./api:/${WORKDIR}"
     depends_on:
@@ -36,6 +36,7 @@ services:
       context: ./front
       args:
         WORKDIR: ${WORKDIR}
+        API_URL: "http://localhost:$API_PORT"
     command: yarn run dev
     volumes:
       - "./front:/${WORKDIR}"
